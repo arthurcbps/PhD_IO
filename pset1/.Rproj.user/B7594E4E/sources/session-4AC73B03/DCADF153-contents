@@ -1,0 +1,13 @@
+input_table <- tribble(~"product" , 
+                       ~"Price Store 1 ($1000/unit)",
+                       ~"Quantity in Store 1 (units)",
+                       ~"Price Store 2 ($1000/unit)",
+                       ~"Quantity in Store 2 (units)",
+                       'product a', 10, 100, 20, 70,
+                       'product b', 30, 10, 35, 10)
+
+output_table <- tribble(~'product',~'store',~'price',~'quantity',
+                        'product a', 1, 10, 100,
+                        'product a', 2, 20, 70,
+                        'product b', 1, 30, 10,
+                        'product b', 2, 35, 10)
