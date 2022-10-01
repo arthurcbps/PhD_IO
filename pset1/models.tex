@@ -1,0 +1,17 @@
+\begin{table}
+\centering
+\begin{tabular}[t]{lccccccccc}
+\toprule
+  & Model 1 & Model 2 & Model 3 & Model 4 & Model 5 & Model 6 & Model 7 & Model 8 & Model 9\\
+\midrule
+price & \num{0.013}*** & \num{0.005} & \num{0.005} &  &  &  &  &  & \\
+prom & \num{0.012}*** & \num{0.029}* & \num{0.029}* & \num{0.014}*** & \num{0.030}* & \num{0.030}* & \num{-0.004} & \num{0.029}+ & \num{0.029}+\\
+fit\_price &  &  &  & \num{0.016}*** & \num{0.007} & \num{0.007} & \num{-0.015} & \num{-0.003} & \num{-0.003}\\
+\midrule
+Num.Obs. & \num{37290} & \num{37290} & \num{37290} & \num{37290} & \num{37290} & \num{37290} & \num{37290} & \num{37290} & \num{37290}\\
+FE: brand &  & X & X &  & X & X &  & X & X\\
+FE: brand_by_store &  &  & X &  &  & X &  &  & X\\
+\bottomrule
+\multicolumn{10}{l}{\rule{0pt}{1em}+ p $<$ 0.1, * p $<$ 0.05, ** p $<$ 0.01, *** p $<$ 0.001}\\
+\end{tabular}
+\end{table}

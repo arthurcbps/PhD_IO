@@ -1,0 +1,17 @@
+\begin{table}
+\centering
+\begin{tabular}[t]{lccc}
+\toprule
+  & 1 & brand & brand + brand\_by\_store\\
+\midrule
+price & \num{0.013}*** & \num{0.005} & \num{0.005}\\
+prom & \num{0.012}*** & \num{0.029}* & \num{0.029}*\\
+\midrule
+Num.Obs. & \num{37290} & \num{37290} & \num{37290}\\
+Std.Errors & IID & by: brand & by: brand\\
+FE: brand &  & X & X\\
+FE: brand_by_store &  &  & X\\
+\bottomrule
+\multicolumn{4}{l}{\rule{0pt}{1em}+ p $<$ 0.1, * p $<$ 0.05, ** p $<$ 0.01, *** p $<$ 0.001}\\
+\end{tabular}
+\end{table}

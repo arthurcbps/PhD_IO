@@ -1,0 +1,91 @@
+### IO problem set - warmup questions
+
+
+library(tidyverse)
+library(fixest)
+library(modelsummary)
+library(janitor)
+library(kableExtra)
+
+# load data
+
+OTC_instruments <- read.csv("OTCDataInstruments.csv", sep = "")
+OTC_headache <- read.delim("~/GitHub/PhD_IO/pset1/OTC_Headache_upd.csv", header = TRUE)
+store_dem <- read.csv("store_demographics.csv")
+
+
+# Reshaping so that each row corresponds to a week-store-brand-size combination
+
+product_data <- OTC_headache %>%
+  pivot_longer(sales_1:prom_11,
+    names_to = c(".value", "product-brand"),
+    names_pattern = "([A-Za-z]+)[^0-9]+([0-9]+)"
+  ) %>%
+  left_join(store_dem, by = c("store" = "STORE")) %>%
+  clean_names() %>%
+  mutate(
+    store = as.factor(store),
+    revenue = price * sales,
+    product_brand = as.numeric(product_brand)
+  ) %>%
+  # categorizing products, I assume 1-11 are in the same order as the table in
+  # question, and I've bundled all store brand objects as a single brand
+  mutate(
+    brand = case_when(
+      product_brand %in% 1:3 ~ "Tylenol",
+      product_brand %in% 4:6 ~ "Advil",
+      product_brand %in% 7:9 ~ "Bayer",
+      product_brand %in% 10:11 ~ "Store Brand"
+    ) %>% as.factor(.),
+    size = case_when(
+      product_brand %in% c(1, 4, 7) ~ 25,
+      product_brand %in% c(2, 5, 8, 10) ~ 50,
+      product_brand %in% c(3, 6, 9, 11) ~ 100
+    ) %>% as.factor(.)
+  ) %>%
+  group_by(week, store) %>%
+  mutate(
+    rev_share = revenue / sum(revenue)
+  ) %>%
+  group_by(week) %>%
+  mutate(
+    haus_iv = (n()*mean(price) - price)/(n() - 1)
+  ) %>%
+  ungroup() %>%
+  # creating brand-by-store dummy, this will make it easier than doing in estimation itself
+  mutate(
+    brand_by_store = paste(brand, "_", store)
+  )
+
+
+models_noIV <- feols(rev_share ~ price + prom | csw0(brand, brand_by_store),
+                data = product_data)
+
+models_costIV <- feols(rev_share ~ prom | csw0(brand, brand_by_store) |
+                         price ~ cost,
+                       data = product_data)
+
+
+models_hausIV <- feols(rev_share ~ prom | csw0(brand, brand_by_store) |
+                         price ~ haus_iv,
+                       data = product_data)
+
+
+models <- list(models_noIV[[1]],
+               models_noIV[[2]],
+               models_noIV[[3]],
+               models_costIV[[1]],
+               models_costIV[[2]],
+               models_costIV[[3]],
+               models_hausIV[[1]],
+               models_hausIV[[2]],
+               models_hausIV[[3]])
+
+
+modelsummary(models, 
+             output = "models.tex",
+             statistic = NULL,
+             stars = TRUE,
+             coef_omit = "Intercept",
+             gof_omit = 'DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors',
+             add_header_above(c(" " = 1, "No IV" = 3, "Cost IV" = 3, "Hausman IV" = 3)))

@@ -1,0 +1,28 @@
+{
+    "id": "4C2FB699",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1664664865398.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "id": "00be81f248af40c68fb7f9980dafec11",
+        "name": "models_hausIV",
+        "title": "models_hausIV",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 2601759800624,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1664664865398,
+    "read_only": false,
+    "read_only_alternatives": []
+}
