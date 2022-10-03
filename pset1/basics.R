@@ -5,6 +5,7 @@ library(tidyverse)
 library(fixest)
 library(modelsummary)
 library(janitor)
+library(kableExtra)
 
 # load data
 
@@ -70,5 +71,55 @@ models_hausIV <- feols(rev_share ~ prom | csw0(brand, brand_by_store) |
                        data = product_data)
 
 
+models <- list(models_noIV[[1]],
+               models_noIV[[2]],
+               models_noIV[[3]],
+               models_costIV[[1]],
+               models_costIV[[2]],
+               models_costIV[[3]],
+               models_hausIV[[1]],
+               models_hausIV[[2]],
+               models_hausIV[[3]])
 
-modelsummary(models_noIV, output = "model_noIv.tex")
+
+modelsummary(models, 
+             output = "models.tex",
+             statistic = NULL,
+             stars = TRUE,
+             coef_omit = "Intercept",
+             gof_omit = 'DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors',
+             add_header_above(c(" " = 1, "No IV" = 3, "Cost IV" = 3, "Hausman IV" = 3)))
+
+
+
+
+## Calculating elasticities
+
+# Getting price coefficients from each model
+
+
+alpha <-  models_noIV %>% map( ~ .x$coefficients[[2]])
+
+
+
+# getting mean price and market-shares (unweighted) by product
+mean_price_share <- product_data %>%
+  group_by(product_brand) %>%
+  summarise(
+    rev_share = mean(rev_share),
+    price = mean(price)
+  )
+
+own_price_elasticity <- mean_price_share %>%
+  mutate(
+    model_1 = -alpha[[1]]*price*(1-rev_share),
+    model_2 = -alpha[[2]]*price*(1-rev_share),
+    model_3 = -alpha[[3]]*price*(1-rev_share)
+  ) %>%
+  left_join(product_data %>%
+              select(product_brand, brand, size) %>%
+              unique()) %>%
+  relocate(brand, size) %>%
+  select(-product_brand)
+
+
