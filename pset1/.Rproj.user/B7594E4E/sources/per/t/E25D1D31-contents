@@ -25,7 +25,6 @@ product_data <- OTC_headache %>%
   clean_names() %>%
   mutate(
     store = as.factor(store),
-    revenue = price * sales,
     product_brand = as.numeric(product_brand)
   ) %>%
   # categorizing products, I assume 1-11 are in the same order as the table in
@@ -41,54 +40,72 @@ product_data <- OTC_headache %>%
       product_brand %in% c(1, 4, 7) ~ 25,
       product_brand %in% c(2, 5, 8, 10) ~ 50,
       product_brand %in% c(3, 6, 9, 11) ~ 100
-    ) %>% as.factor(.)
+    )
+  ) %>%
+  # converting to total amounts of pills sold
+  mutate(
+    sales_pills = size * sales
   ) %>%
   group_by(week, store) %>%
   mutate(
-    rev_share = revenue / sum(revenue)
+    mkt_share = sales_pills / sum(sales_pills)
+  ) %>%
+  # calculating market share of the outside good - ie store brand products
+  mutate(
+    share_outside = sum(mkt_share * (brand == "Store Brand")),
+    delta_log_share = log(mkt_share) - log(share_outside)
   ) %>%
   group_by(week) %>%
   mutate(
-    haus_iv = (n()*mean(price) - price)/(n() - 1)
+    haus_iv = (n() * mean(price) - price) / (n() - 1)
   ) %>%
   ungroup() %>%
   # creating brand-by-store dummy, this will make it easier than doing in estimation itself
   mutate(
     brand_by_store = paste(brand, "_", store)
+  ) %>%
+  # remove outside good of the sample
+  filter(brand != "Store Brand")
+
+
+
+models_noIV <- feols(delta_log_share ~ price + prom | csw0(brand, brand_by_store),
+  data = product_data
   )
 
-
-models_noIV <- feols(rev_share ~ price + prom | csw0(brand, brand_by_store),
-                data = product_data)
-
-models_costIV <- feols(rev_share ~ prom | csw0(brand, brand_by_store) |
-                         price ~ cost,
-                       data = product_data)
+models_costIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
+  price ~ cost,
+  data = product_data
+)
 
 
-models_hausIV <- feols(rev_share ~ prom | csw0(brand, brand_by_store) |
-                         price ~ haus_iv,
-                       data = product_data)
+models_hausIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
+  price ~ haus_iv,
+  data = product_data
+)
 
 
-models <- list(models_noIV[[1]],
-               models_noIV[[2]],
-               models_noIV[[3]],
-               models_costIV[[1]],
-               models_costIV[[2]],
-               models_costIV[[3]],
-               models_hausIV[[1]],
-               models_hausIV[[2]],
-               models_hausIV[[3]])
+models <- list(
+  models_noIV[[1]],
+  models_noIV[[2]],
+  models_noIV[[3]],
+  models_costIV[[1]],
+  models_costIV[[2]],
+  models_costIV[[3]],
+  models_hausIV[[1]],
+  models_hausIV[[2]],
+  models_hausIV[[3]]
+)
 
 
-modelsummary(models, 
-             output = "models.tex",
-             statistic = NULL,
-             stars = TRUE,
-             coef_omit = "Intercept",
-             gof_omit = 'DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors',
-             add_header_above(c(" " = 1, "No IV" = 3, "Cost IV" = 3, "Hausman IV" = 3)))
+modelsummary(models,
+  output = "models.tex",
+  statistic = NULL,
+  stars = TRUE,
+  coef_omit = "Intercept",
+  gof_omit = "DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors",
+  add_header_above(c(" " = 1, "No IV" = 3, "Cost IV" = 3, "Hausman IV" = 3))
+)
 
 
 
@@ -98,7 +115,7 @@ modelsummary(models,
 # Getting price coefficients from each model
 
 
-alpha <-  models_noIV %>% map( ~ .x$coefficients[[2]])
+alpha <- models_noIV %>% map(~ .x$coefficients[[2]])
 
 
 
@@ -106,20 +123,18 @@ alpha <-  models_noIV %>% map( ~ .x$coefficients[[2]])
 mean_price_share <- product_data %>%
   group_by(product_brand) %>%
   summarise(
-    rev_share = mean(rev_share),
+    mkt_share = mean(mkt_share),
     price = mean(price)
   )
 
 own_price_elasticity <- mean_price_share %>%
   mutate(
-    model_1 = -alpha[[1]]*price*(1-rev_share),
-    model_2 = -alpha[[2]]*price*(1-rev_share),
-    model_3 = -alpha[[3]]*price*(1-rev_share)
+    model_1 = -alpha[[1]] * price * (1 - mkt_share),
+    model_2 = -alpha[[2]] * price * (1 - mkt_share),
+    model_3 = -alpha[[3]] * price * (1 - mkt_share)
   ) %>%
   left_join(product_data %>%
-              select(product_brand, brand, size) %>%
-              unique()) %>%
+    select(product_brand, brand, size) %>%
+    unique()) %>%
   relocate(brand, size) %>%
   select(-product_brand)
-
-
