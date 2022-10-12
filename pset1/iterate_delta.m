@@ -1,7 +1,6 @@
 
 %%% Now we used our implied model shares and the observed ones to iterate on a contraction and
-%%% back out mean utility delta and the unobserved xi's
-
+%%% back out mean utility delta
 function delta_new = iterate_delta(sigmaI, sigmaB, mkt_share, prices, income, branded)
 
 delta_new = 0.1*ones(size(prices));
