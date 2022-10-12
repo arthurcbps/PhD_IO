@@ -1,0 +1,39 @@
+function model_share = gen_model_share(delta, sigmaI, sigmaB, price_data, income_data, branded_data)
+
+
+% first step - fix non linear parameters sigmaB, sigmaI and draw values to
+% simulate market shares
+% we need to draw R times the individual-level terms in the nonlinear component of utility  mu_ij - 
+% those are the Gaussian error term and Income. 
+% we also take as given the linear term - delta
+
+R = 50;
+% normal shocks and income vary by individual only, so we draw R times for
+% each
+
+[nt, J] = size(price_data);
+
+
+v = randn(nt, R);
+v = permute(v, [1, 3, 2]);
+stack_v = repmat(v, 1, J, 1);
+% we draw income from the empirical distribution, assuming it is iid across
+% observations
+rand_income = income_data(randi(length(income_data), nt, R));
+rand_income = permute(rand_income, [1, 3, 2]);
+stack_rand_income = repmat(rand_income, 1, J, 1);
+
+% now we compute model-implied market shares for each combination of
+% product j, week-store n, draw R
+
+
+stack_delta = repmat(delta, 1, 1, R);
+stack_price = repmat(price_data, 1, 1, R);
+stack_branded = repmat(branded_data, 1, 1, R);
+
+numerator = exp(stack_delta + sigmaI.*stack_rand_income.*stack_price + sigmaB.*stack_v.*stack_branded);
+denominator = 1 + sum(numerator, 2);
+model_share_r = numerator./denominator;
+model_share = mean(model_share_r, 3);
+
+end
