@@ -12,7 +12,9 @@ R = 50;
 % each
 
 [nt, J] = size(prices);
-
+% this ensures we draw the same numbers on every step of the contraction
+% mapping
+rng('default')
 
 v = randn(nt, R);
 
@@ -28,8 +30,7 @@ rand_income = income(indices);
 share_r = zeros(nt, J, R);
 for r=1:R
     numerator = exp(delta + sigmaI.*rand_income(:, r).*prices + sigmaB.*v(:, r).*branded);
-    denominator = sum(numerator, 2);
-    share_r(:,:,r) = numerator./(1+denominator);
+    share_r(:,:,r) = numerator./(1+sum(numerator, 2));
 end
 
 model_share = mean(share_r,3);

@@ -1,8 +1,8 @@
 
 % BLP
 clear clc
-% load data in long formatted (transformed in R script) and extracting
-% relevant variables
+% load data in wide format (transformed in R script) and extracting
+% relevant variables - this is useful for obtaining delta terms
 
 data_wide=readtable('data_clean_wide.csv');
 
