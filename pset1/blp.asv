@@ -20,7 +20,7 @@ clear data_long
 % draws
 R = 50;
 
-x = iterate_delta(5, 5, mkt_share, prices, income, branded);
+x = iterate_delta(0, 0.3, mkt_share, prices, income, branded);
 
 
 
