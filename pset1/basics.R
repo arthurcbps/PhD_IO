@@ -41,7 +41,7 @@ product_data <- OTC_headache %>%
       product_brand %in% c(2, 5, 8, 10) ~ 50,
       product_brand %in% c(3, 6, 9, 11) ~ 100
     )
-    ) %>%
+  ) %>%
   group_by(week) %>%
   mutate(
     haus_iv = (n() * mean(price) - price) / (n() - 1)
@@ -50,36 +50,44 @@ product_data <- OTC_headache %>%
   # assumption - 2% of drug store customers go to it to by headache medicine
   mutate(
     total_sales = sum(sales),
-    mkt_share = sales /(count*0.02)
+    mkt_share = sales / (count * 0.02)
   ) %>%
   mutate(
     mkt_share_inside = sum(mkt_share),
     mkt_share_outside = 1 - sum(mkt_share),
     prom = ifelse(prom > 0, 1, prom)
-  # adjust promotion variable
-  ) %>% 
+    # adjust promotion variable
+  ) %>%
   # creating brand-by-store dummy, this will make it easier than doing in estimation itself
   mutate(
     brand_by_store = paste(brand, "_", store),
     delta_log_share = log(mkt_share) - log(mkt_share_outside)
-    )
+  )
+
+
+
+product_data <-product_data %>%
+  na.omit(.)
+
 
 write_csv(product_data, file = "data_longFormat.csv")
 
 
+
+
 models_noIV <- feols(delta_log_share ~ price + prom | csw0(brand, brand_by_store),
   data = product_data
-  )
+)
 
 models_costIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
   price ~ cost,
-  data = product_data
+data = product_data
 )
 
 
 models_hausIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
   price ~ haus_iv,
-  data = product_data
+data = product_data
 )
 
 
@@ -97,14 +105,15 @@ models <- list(
 
 
 x <- modelsummary(models,
-  output = 'latex',
+  output = "latex",
   statistic = NULL,
-  stars =  c('*' =0.1, '**' = 0.05, '***' = 0.01),
+  stars = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
   coef_omit = "Intercept",
-  gof_omit = "DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors") %>%
+  gof_omit = "DF|Deviance|R2|AIC|BIC|RMSE|Std.Errors"
+) %>%
   add_header_above(c(" " = 1, "No IV" = 3, "Cost IV" = 3, "Hausman IV" = 3))
 
-  save_kable(x, 'basic_models.tex')
+save_kable(x, "basic_models.tex")
 
 
 
@@ -135,17 +144,17 @@ own_price_elasticity <- mean_price_share %>%
     model_3 = -alpha[[3]] * price * (1 - mkt_share)
   ) %>%
   left_join(product_data %>%
-              ungroup() %>%
-              select(product_brand, brand, size) %>%
-              unique()) %>%
+    ungroup() %>%
+    select(product_brand, brand, size) %>%
+    unique()) %>%
   relocate(brand, size) %>%
   select(-c(product_brand, mkt_share, price)) %>%
-  rename(Brand = brand,
-         Size = size
-         )
+  rename(
+    Brand = brand,
+    Size = size
+  )
 
-y <- datasummary_df(own_price_elasticity, output = 'latex') %>%
+y <- datasummary_df(own_price_elasticity, output = "latex") %>%
   add_header_above(c(" " = 2, "Price elasticities" = 3))
 
-  save_kable(y, 'elasticities_basic.tex')
-  
+save_kable(y, "elasticities_basic.tex")
