@@ -30,7 +30,7 @@ product_data <- OTC_headache %>%
   # categorizing products, I assume 1-11 are in the same order as the table in
   # question, and I've bundled all store brand objects as a single brand
   mutate(
-    brand = case_when(
+    brand_name = case_when(
       product_brand %in% 1:3 ~ "Tylenol",
       product_brand %in% 4:6 ~ "Advil",
       product_brand %in% 7:9 ~ "Bayer",
@@ -49,7 +49,6 @@ product_data <- OTC_headache %>%
   group_by(week, store) %>%
   # assumption - 2% of drug store customers go to it to by headache medicine
   mutate(
-    total_sales = sum(sales),
     mkt_share = sales / (count * 0.02)
   ) %>%
   mutate(
@@ -60,32 +59,47 @@ product_data <- OTC_headache %>%
   ) %>%
   # creating brand-by-store dummy, this will make it easier than doing in estimation itself
   mutate(
-    brand_by_store = paste(brand, "_", store),
+    brand_by_store = paste(brand_name, "_", store),
     delta_log_share = log(mkt_share) - log(mkt_share_outside)
-  )
+  ) %>%
+  select(-c(count, sales, educ, hsizeavg, nwhite, mkt_share_inside, mkt_share_outside))
+
+#adding iv vars, even the ones we wont use now (only in blp)
+product_data <- product_data %>%
+  left_join(OTC_instruments %>%
+              mutate(store = factor(store)) %>%
+              rename(product_brand = brand) %>%
+              select(-cost_)) %>%
+  na.omit()
+  
+
+
+product_data_long_blp <- product_data %>%
+  dummy_cols(select_columns = "brand_name") %>%
+  select(-c(brand_by_store, brand_name)) %>%
+  select(price, prom, starts_with('brand_'), cost, haus_iv, avoutprice,
+         starts_with('pricestore')
+         )
+
+  
+
+write_csv(product_data, file = "data_long.csv")
+write_csv(product_data_long_blp, file = "data_BLPlong.csv")
 
 
 
-product_data <-product_data %>%
-  na.omit(.)
 
-
-write_csv(product_data, file = "data_longFormat.csv")
-
-
-
-
-models_noIV <- feols(delta_log_share ~ price + prom | csw0(brand, brand_by_store),
+models_noIV <- feols(delta_log_share ~ price + prom | csw0(brand_name, brand_by_store),
   data = product_data
 )
 
-models_costIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
+models_costIV <- feols(delta_log_share ~ prom | csw0(brand_name, brand_by_store) |
   price ~ cost,
 data = product_data
 )
 
 
-models_hausIV <- feols(delta_log_share ~ prom | csw0(brand, brand_by_store) |
+models_hausIV <- feols(delta_log_share ~ prom | csw0(brand_name, brand_by_store) |
   price ~ haus_iv,
 data = product_data
 )
@@ -145,12 +159,12 @@ own_price_elasticity <- mean_price_share %>%
   ) %>%
   left_join(product_data %>%
     ungroup() %>%
-    select(product_brand, brand, size) %>%
+    select(product_brand, brand_name, size) %>%
     unique()) %>%
-  relocate(brand, size) %>%
+  relocate(brand_name, size) %>%
   select(-c(product_brand, mkt_share, price)) %>%
   rename(
-    Brand = brand,
+    Brand = brand_name,
     Size = size
   )
 

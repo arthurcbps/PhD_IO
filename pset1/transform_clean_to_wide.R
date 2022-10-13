@@ -1,13 +1,13 @@
 ### Transforming the cleaned data set back to wide format - this will be useful 
 ### for BLP
 
-data_long <- read.csv('data_longFormat.csv')
+data_long <- read.csv('data_long.csv')
 
 ### delete stuff
 
 data_long <- data_long %>%
   mutate(
-    branded = ifelse(brand == "Store Brand", 0, 1)
+    branded = ifelse(brand_name == "Store Brand", 0, 1)
   ) %>%
   select(week, store, product_brand, price, prom, income, mkt_share, branded)
 

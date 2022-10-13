@@ -16,21 +16,30 @@ branded = table2array(data_wide(:, 47:57));
 
 % load long data for estimation:
 
-data_long = readtable('data_long_final.csv');
+data_long = readtable('data_BLPlong.csv');
 
-price_long = table2array(data_long(:,2));
-prom_long = table2array(data_long(:,3));
-brand_dummies = table2array(data_long(:,5:14));
-iv = table2array(data_long(:,15:46));
+price_long = table2array(data_long(:,1));
+prom_long = table2array(data_long(:,2));
+brand_dummies = table2array(data_long(:,3:6));
+iv = table2array(data_long(:,7:39));
 
 Z = [iv prom_long brand_dummies];
 X1 = [price_long prom_long brand_dummies];
 
+% gets nonlinear parameters - sigmas
+
 opt_00 = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, 50), [0 ; 0]);
 
 
+delta_optimal = iterate_delta(opt_00(1),opt_00(2),  mkt_share, prices, income, branded, 50);
+delta_optimal_long= delta_optimal(:);
 
-%
+W = inv(Z'*Z);
+
+theta1_hat = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_optimal_long;
+    
+
+
 
 x = iterate_delta(5, 5, mkt_share, prices, income, branded, 50);
 
