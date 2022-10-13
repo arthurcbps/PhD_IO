@@ -13,14 +13,12 @@ income = table2array(data_wide(:, 25:35));
 mkt_share = table2array(data_wide(:, 36:46));
 branded = table2array(data_wide(:, 47:57));
 
-clear data_long
 
 
 % first step - get implied model shares
 % draws
-R = 50;
 
-x = iterate_delta(5, 5, mkt_share, prices, income, branded);
+x = iterate_delta(5, 5, mkt_share, prices, income, branded, 50);
 
 
 
