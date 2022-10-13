@@ -15,8 +15,6 @@ branded = table2array(data_wide(:, 47:57));
 
 
 
-% first step - get implied model shares
-% draws
 
 x = iterate_delta(5, 5, mkt_share, prices, income, branded, 50);
 
