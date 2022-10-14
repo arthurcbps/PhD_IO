@@ -16,7 +16,7 @@ delta_wide = iterate_delta(sigmaI, sigmaB, mkt_share, prices, income, branded, R
 
 % use Nevo's tip of setting the function to be arbitrarily high if mean
 % utility is ill-defined
-if sum(isnan(delta_wide), "all") > 0
+if max(isnan(delta_wide))== 1
     moment = -1e10;
 else
     delta_long = delta_wide(:);
@@ -30,7 +30,7 @@ else
 
     xi = delta_long - X1*lin_par;
 
-    moment = -xi'*Z*W*Z'*xi;
+    moment = xi'*Z*W*Z'*xi;
 
 end
 

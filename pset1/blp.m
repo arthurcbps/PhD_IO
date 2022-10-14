@@ -28,20 +28,26 @@ X1 = [price_long prom_long brand_dummies];
 
 % gets nonlinear parameters - sigmas
 
-opt_00 = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, 50), [0 ; 0]);
-
-
-delta_optimal = iterate_delta(opt_00(1),opt_00(2),  mkt_share, prices, income, branded, 50);
-delta_optimal_long= delta_optimal(:);
-
 W = inv(Z'*Z);
 
-theta1_hat = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_optimal_long;
-    
+
+
+nl_par00 = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, 20), [0 ; 0]);
+delta_00= iterate_delta(opt_00(1),opt_00(2),  mkt_share, prices, income, branded, 50);
+delta_00_long= delta_00(:);
+
+linpar_00 = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_00_long;
+
+%changing the starting point
+nl_par11 = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, 20), [1 ; 1]);
+delta_11= iterate_delta(opt_00(1),opt_00(2),  mkt_share, prices, income, branded, 50);
+delta_11_long= delta_11(:);
+
+linpar_11 = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_11_long;
 
 
 
-x = iterate_delta(5, 5, mkt_share, prices, income, branded, 50);
+
 
 
 
