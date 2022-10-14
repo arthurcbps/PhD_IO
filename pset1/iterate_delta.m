@@ -15,6 +15,9 @@ v_draws = randn(nt, R);
 
 % we draw income from the empirical distribution, assuming it is iid across
 % observations
+% set a seed for reproducibility
+
+rng(1)
 indices = randi(length(income), nt, R);
 
 income_draws = income(indices);
