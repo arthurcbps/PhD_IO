@@ -77,7 +77,7 @@ alpha_logit = lin_par_logit(1);
 % now we compute model implied market shares
 
 share = exp(delta_logit_s9w10)./(1 + sum(exp(delta_logit_s9w10)));
-
+% and formula for substitution matrix
 slutsky_logit = (1./share).*alpha_logit.*price_s9_w10'.*(diag(share) - share*share');
 
 
