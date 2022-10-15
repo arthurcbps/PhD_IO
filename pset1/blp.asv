@@ -40,14 +40,14 @@ R = 20;
 %optimization
 % gets nonlinear parameters - sigmas
 
-[nl_par00, gmm_crit_00] = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, R), [0 ; 0]);
+[nl_par00, gmm_crit_00] = fminsearch(@(params)gmm(params(1), params(2), X1, Z, mkt_share, prices, income, branded, R), [0 ; 0]);
 delta_00= iterate_delta(nl_par00(1),nl_par00(2),  mkt_share, prices, income, branded, R);
 delta_00_long= delta_00(:);
 clear delta_00
 linpar_00 = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_00_long;
 
 %changing the starting point
-[nl_par11, gmm_crit_11] = fminsearch(@(params)gmm(params(1:2), X1, Z, mkt_share, prices, income, branded, R), [1 ; 1]);
+[nl_par11, gmm_crit_11] = fminsearch(@(params)gmm(params(1), params(2), X1, Z, mkt_share, prices, income, branded, R), [1 ; 1]);
 delta_11= iterate_delta(nl_par11(1), nl_par11(2),  mkt_share, prices, income, branded, R);
 delta_11_long= delta_11(:);
 clear delta_11
@@ -68,7 +68,7 @@ Walt = inv(Zalt'*Zalt);
 
 
 
-[nl_paralt, gmm_crit_alt] = fminsearch(@(params)gmm(params(1:2), X1alt, Zalt, mkt_share, prices, income, branded, R), [0 ; 0]);
+[nl_paralt, gmm_crit_alt] = fminsearch(@(params)gmm(params(1), params(2), X1alt, Zalt, mkt_share, prices, income, branded, R), [0 ; 0]);
 delta_alt= iterate_delta(nl_paralt(1),nl_paralt(2),  mkt_share, prices, income, branded, R);
 delta_alt_long= delta_alt(:);
 clear delta_alt
@@ -129,13 +129,63 @@ v_draws = randn(R,1)';
 
 indices = randi(length(income), 1, R);
 income_draws = income(indices, 1);
+clear indices
 
 [~, J] = size(income);
 
-share_r = zeros(J, R);
+pre_slutsky = zeros(J, J, R);
 for r=1:R
-    numerator = exp(delta_blp_s9w10 + sigmaI_blp.*income_draws.*price_s9_w10 + sigmaB_blp.*v_draws.*branded_s9w10');
-    share_r(:,r) = numerator./(1+sum(numerator, 2));
+    numerator = exp(delta_blp_s9w10' + sigmaI_blp.*income_draws(r).*price_s9_w10 + sigmaB_blp.*v_draws(r).*branded_s9w10');
+    share_r = numerator./(1+sum(numerator));
+    pre_slutsky(:, :, r) = (alpha_blp + sigmaI_blp.* income_draws(r)).*price_s9_w10'.*(diag(share_r) - share_r*share_r');
 end
+
+slutsky_blp = (1./mkt_share_s9_w10).*price_s9_w10.*mean(pre_slutsky,3);
+
+%% Supply side
+
+
+% we back out marginal costs by solving a linear system coming from firm's
+% FOCs - formula is in the notes
+
+% first we define an ownership matrix - omega_jk = 1 if products j and k
+% belong to the same firm
+
+Omega = [1 1 1 0 0 0 0 0 0 0 0;
+         1 1 1 0 0 0 0 0 0 0 0;
+         1 1 1 0 0 0 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 0 0 0 1 1;
+         0 0 0 0 0 0 0 0 0 1 1];
+
+% logit case
+mc_logit = price_s9_w10 + inv(Omega.*slutsky_logit.*mkt_share_s9_w10./price_s9_w10)*mkt_share_s9_w10;
+
+% blp case
+
+mc_blp = price_s9_w10 + inv(Omega.*slutsky_blp.*mkt_share_s9_w10./price_s9_w10)*mkt_share_s9_w10;
+
+%% MERGER
+
+% New ownership matrix
+
+
+Omega_merge = [1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         0 0 0 0 0 0 0 0 0 1 1;
+         0 0 0 0 0 0 0 0 0 1 1];
+
 
 

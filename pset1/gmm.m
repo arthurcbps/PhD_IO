@@ -15,7 +15,7 @@ delta_wide = iterate_delta(sigmaI, sigmaB, mkt_share, prices, income, branded, R
 % use Nevo's tip of setting the function to be arbitrarily high if mean
 % utility is ill-defined
 if max(isnan(delta_wide))== 1
-    moment = -1e10;
+    moment = 1e10;
 else
     delta_long = delta_wide(:);
     %optimal weighting matrix

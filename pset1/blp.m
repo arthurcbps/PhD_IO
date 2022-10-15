@@ -142,4 +142,53 @@ end
 
 slutsky_blp = (1./mkt_share_s9_w10).*price_s9_w10.*mean(pre_slutsky,3);
 
+%% Supply side
+
+
+% we back out marginal costs by solving a linear system coming from firm's
+% FOCs - formula is in the notes
+
+% first we define an ownership matrix - omega_jk = 1 if products j and k
+% belong to the same firm
+
+Omega = [1 1 1 0 0 0 0 0 0 0 0;
+         1 1 1 0 0 0 0 0 0 0 0;
+         1 1 1 0 0 0 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 1 1 1 0 0 0 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 1 1 1 0 0;
+         0 0 0 0 0 0 0 0 0 1 1;
+         0 0 0 0 0 0 0 0 0 1 1];
+
+% logit case
+mc_logit = price_s9_w10 + inv(Omega.*slutsky_logit.*mkt_share_s9_w10./price_s9_w10)*mkt_share_s9_w10;
+
+% blp case
+
+mc_blp = price_s9_w10 + inv(Omega.*slutsky_blp.*mkt_share_s9_w10./price_s9_w10)*mkt_share_s9_w10;
+
+%% MERGER
+
+% New ownership matrix
+
+
+Omega_merge = [1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         1 1 1 1 1 1 1 1 1 0 0;
+         0 0 0 0 0 0 0 0 0 1 1;
+         0 0 0 0 0 0 0 0 0 1 1];
+
+% use estimated marginal costs and formula for logit elasticities to back out prices
+% that solve firm's system of FOCs
+
+
 
