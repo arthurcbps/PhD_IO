@@ -7,10 +7,8 @@
 
 % X1 as product characteristics - brand dummies, promotion, price
 % Z are instruments to construct the weighting matrix
-function moment = gmm(nl_par, X1, Z, mkt_share, prices, income, branded, R)
+function moment = gmm(sigmaI, sigmaB, X1, Z, mkt_share, prices, income, branded, R)
 
-sigmaI = nl_par(1);
-sigmaB = nl_par(2);
 
 delta_wide = iterate_delta(sigmaI, sigmaB, mkt_share, prices, income, branded, R);
 

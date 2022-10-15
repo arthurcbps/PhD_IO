@@ -27,7 +27,7 @@ delta_new = 0.1*ones(size(prices));
 count = 1;
 agg_error = 1;
 
-while (agg_error > 0.001) && count <= 10000
+while (agg_error > 1e-13) && count <= 10000
     delta_old = delta_new;
     delta_new = delta_old + log(mkt_share) - ...
         log(gen_model_share(delta_old, sigmaI, sigmaB, prices, branded, income_draws, v_draws, R));

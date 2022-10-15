@@ -4,7 +4,7 @@ function model_share = gen_model_share(delta, sigmaI, sigmaB, prices, branded, i
 % fix non linear parameters sigmaB, sigmaI, and income and
 % gaussian shock draws
 % we compute model-implied market shares for each combination of
-% product j, week-store n, draw R
+% product j, week-store n, draw r
 
 
 % we also take as given the linear term - delta
