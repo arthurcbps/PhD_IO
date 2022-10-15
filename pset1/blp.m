@@ -188,7 +188,12 @@ Omega_merge = [1 1 1 1 1 1 1 1 1 0 0;
          0 0 0 0 0 0 0 0 0 1 1];
 
 % use estimated marginal costs and formula for logit elasticities to back out prices
-% that solve firm's system of FOCs
+% that solve firm's system of FOCs - use logit previous prices as initial
+% guesses
+
+new_prices = fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega_merge, delta_logit_s9w10, alpha_logit, price_s9_w10), [price_s9_w10]);
+% test that with the status quo nothing changes - all equal!
+test_prices= fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega, delta_logit_s9w10, alpha_logit, price_s9_w10), [price_s9_w10]);
 
 
 
