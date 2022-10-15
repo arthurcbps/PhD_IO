@@ -6,6 +6,7 @@ library(fixest)
 library(modelsummary)
 library(janitor)
 library(kableExtra)
+library(fastDummies)
 
 # load data
 
@@ -77,7 +78,7 @@ product_data <- product_data %>%
 product_data_long_blp <- product_data %>%
   dummy_cols(select_columns = "brand_name") %>%
   select(-c(brand_by_store, brand_name)) %>%
-  select(price, prom, starts_with('brand_'), cost, haus_iv, avoutprice,
+  select(week, store, mkt_share, price, prom, starts_with('brand_'), cost, haus_iv, avoutprice,
          starts_with('pricestore')
          )
 
