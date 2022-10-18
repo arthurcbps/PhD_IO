@@ -17,18 +17,17 @@ delta_wide = iterate_delta(sigmaI, sigmaB, mkt_share, prices, income, branded, R
 if max(isnan(delta_wide))== 1
     moment = 1e10;
 else
-    delta_long = delta_wide(:);
+delta_long = reshape(delta_wide',[],1);
     %optimal weighting matrix
-    W = inv(Z'*Z);
     % expression for linear parameters (the trick)
 
-    lin_par = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_long;
+    lin_par = inv(X1'*Z*inv(Z'*Z)*Z'*X1)*X1'*Z*inv(Z'*Z)*Z'*delta_long;
 
     % back out xi's to form moment conditions
 
     xi = delta_long - X1*lin_par;
 
-    moment = xi'*Z*W*Z'*xi;
+    moment = xi'*Z*inv(Z'*Z)*Z'*xi;
 
 end
 

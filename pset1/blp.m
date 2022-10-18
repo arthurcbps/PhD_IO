@@ -25,11 +25,13 @@ price_long = table2array(data_long(:,4));
 prom_long = table2array(data_long(:,5));
 brand_dummies = table2array(data_long(:,6:9));
 product_dummies = table2array(data_long(:, 43:53));
-iv = table2array(data_long(:,10:42));
+cost = table2array(data_long(:,10));
+price_iv = table2array(data_long(:,12:42));
 
-Z = [iv prom_long brand_dummies];
+
+Z = [cost price_iv prom_long product_dummies];
 clear iv
-X1 = [price_long prom_long brand_dummies];
+X1 = [price_long prom_long product_dummies];
 
 
 W = inv(Z'*Z);
@@ -41,38 +43,38 @@ R = 20;
 % gets nonlinear parameters - sigmas
 
 [nl_par00, gmm_crit_00] = fminsearch(@(params)gmm(params(1), params(2), X1, Z, mkt_share, prices, income, branded, R), [0 ; 0]);
-delta_00= iterate_delta(nl_par00(1),nl_par00(2),  mkt_share, prices, income, branded, R);
-delta_00_long= delta_00(:);
+delta_00= iterate_delta(nl_par00(1), nl_par00(2), mkt_share, prices, income, branded, R);
+delta_00_long= reshape(delta_00', [], 1);
 clear delta_00
-linpar_00 = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_00_long;
+linpar_00 = inv(X1'*Z*inv(Z'*Z)*Z'*X1)*X1'*Z*inv(Z'*Z)*Z'*delta_00_long;
 
 %changing the starting point
 [nl_par11, gmm_crit_11] = fminsearch(@(params)gmm(params(1), params(2), X1, Z, mkt_share, prices, income, branded, R), [1 ; 1]);
 delta_11= iterate_delta(nl_par11(1), nl_par11(2),  mkt_share, prices, income, branded, R);
-delta_11_long= delta_11(:);
+delta_11_long= reshape(delta_11', [], 1);
 clear delta_11
-linpar_11 = inv(X1'*Z*W*Z'*X1)*X1'*Z*W*Z'*delta_11_long;
+linpar_11 = inv(X1'*Z*inv(Z'*Z)*Z'*X1)*X1'*Z*inv(Z'*Z)*Z'*delta_11_long;
 
 
 
 % alternative estimation (just in case) - using product dummies instead of
 % brand dummies
-iv = table2array(data_long(:,10:42));
-Zalt = [iv prom_long product_dummies];
-clear iv
-X1alt = [price_long prom_long product_dummies];
+% iv = table2array(data_long(:,10:42));
+% Zalt = [iv prom_long product_dummies];
+% clear iv
+% X1alt = [price_long prom_long product_dummies];
 
 % gets nonlinear parameters - sigmas
 
-Walt = inv(Zalt'*Zalt);
-
-
-
-[nl_paralt, gmm_crit_alt] = fminsearch(@(params)gmm(params(1), params(2), X1alt, Zalt, mkt_share, prices, income, branded, R), [0 ; 0]);
-delta_alt= iterate_delta(nl_paralt(1),nl_paralt(2),  mkt_share, prices, income, branded, R);
-delta_alt_long= delta_alt(:);
-clear delta_alt
-linpar_alt= inv(X1alt'*Zalt*Walt*Zalt'*X1alt)*X1alt'*Zalt*Walt*Zalt'*delta_alt_long;
+% Walt = inv(Zalt'*Zalt);
+% 
+% 
+% 
+% [nl_paralt, gmm_crit_alt] = fminsearch(@(params)gmm(params(1), params(2), X1alt, Zalt, mkt_share, prices, income, branded, R), [0 ; 0]);
+% delta_alt= iterate_delta(nl_paralt(1),nl_paralt(2),  mkt_share, prices, income, branded, R);
+% delta_alt_long= reshape(delta_alt', [], 1);
+% clear delta_alt
+% linpar_alt= inv(X1alt'*Zalt*Walt*Zalt'*X1alt)*X1alt'*Zalt*Walt*Zalt'*delta_alt_long;
 
 
 %% Elasticities for store 9 in week 10
@@ -140,7 +142,7 @@ for r=1:R
     pre_slutsky(:, :, r) = (alpha_blp + sigmaI_blp.* income_draws(r)).*price_s9_w10'.*(diag(share_r) - share_r*share_r');
 end
 
-slutsky_blp = (1./mkt_share_s9_w10).*price_s9_w10.*mean(pre_slutsky,3);
+slutsky_blp = (1./mkt_share_s9_w10).*mean(pre_slutsky,3);
 
 %% Supply side
 
@@ -188,12 +190,12 @@ Omega_merge = [1 1 1 1 1 1 1 1 1 0 0;
          0 0 0 0 0 0 0 0 0 1 1];
 
 % use estimated marginal costs and formula for logit elasticities to back out prices
-% that solve firm's system of FOCs - use logit previous prices as initial
+% that solve firm's system of FOCs - use  previous prices as initial
 % guesses
 
-new_prices = fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega_merge, delta_logit_s9w10, alpha_logit, price_s9_w10), [price_s9_w10]);
+new_prices = fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega_merge, delta_logit_s9w10, alpha_logit, price_s9_w10), price_s9_w10);
 % test that with the status quo nothing changes - all equal!
-test_prices= fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega, delta_logit_s9w10, alpha_logit, price_s9_w10), [price_s9_w10]);
+test_prices= fsolve(@(params)merger_logit(params(1:11), mc_logit, Omega, delta_logit_s9w10, alpha_logit, price_s9_w10), price_s9_w10);
 
 
 

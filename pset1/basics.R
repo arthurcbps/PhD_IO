@@ -25,7 +25,6 @@ product_data <- OTC_headache %>%
   left_join(store_dem, by = c("store" = "STORE")) %>%
   clean_names() %>%
   mutate(
-    store = as.factor(store),
     product_brand = as.numeric(product_brand)
   ) %>%
   # categorizing products, I assume 1-11 are in the same order as the table in
@@ -36,7 +35,7 @@ product_data <- OTC_headache %>%
       product_brand %in% 4:6 ~ "Advil",
       product_brand %in% 7:9 ~ "Bayer",
       product_brand %in% 10:11 ~ "Store Brand"
-    ) %>% as.factor(.),
+    ),
     size = case_when(
       product_brand %in% c(1, 4, 7) ~ 25,
       product_brand %in% c(2, 5, 8, 10) ~ 50,
@@ -50,7 +49,7 @@ product_data <- OTC_headache %>%
   group_by(week, store) %>%
   # assumption - 2% of drug store customers go to it to by headache medicine
   mutate(
-    mkt_share = sales / (count * 0.02)
+    mkt_share = sales / (0.02*count)
   ) %>%
   mutate(
     mkt_share_inside = sum(mkt_share),
@@ -68,7 +67,6 @@ product_data <- OTC_headache %>%
 #adding iv vars, even the ones we wont use now (only in blp)
 product_data <- product_data %>%
   left_join(OTC_instruments %>%
-              mutate(store = factor(store)) %>%
               rename(product_brand = brand) %>%
               select(-cost_)) %>%
   na.omit()
@@ -76,10 +74,12 @@ product_data <- product_data %>%
 
 
 product_data_long_blp <- product_data %>%
+  # adding product dummies to just in case
+  dummy_cols(select_columns = "product_brand") %>% 
   dummy_cols(select_columns = "brand_name") %>%
-  select(-c(brand_by_store, brand_name)) %>%
+  select(-c(brand_by_store, brand_name, product_brand)) %>%
   select(week, store, mkt_share, price, prom, starts_with('brand_'), cost, haus_iv, avoutprice,
-         starts_with('pricestore')
+         starts_with('pricestore'), starts_with('product_brand')
          )
 
   
