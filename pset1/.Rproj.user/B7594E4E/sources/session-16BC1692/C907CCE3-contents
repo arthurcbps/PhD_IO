@@ -139,7 +139,7 @@ save_kable(x, "basic_models.tex")
 # Getting price coefficients from each model
 
 
-alpha <- models_noIV %>% map(~ .x$coefficients[[2]])
+alpha <- models_noIV %>% map(~ .x$coefficients[['price']])
 
 
 
@@ -154,9 +154,9 @@ mean_price_share <- product_data %>%
 own_price_elasticity <- mean_price_share %>%
   ungroup() %>%
   mutate(
-    model_1 = -alpha[[1]] * price * (1 - mkt_share),
-    model_2 = -alpha[[2]] * price * (1 - mkt_share),
-    model_3 = -alpha[[3]] * price * (1 - mkt_share)
+    model_1 = alpha[[1]] * price * (1 - mkt_share),
+    model_2 = alpha[[2]] * price * (1 - mkt_share),
+    model_3 = alpha[[3]] * price * (1 - mkt_share)
   ) %>%
   left_join(product_data %>%
     ungroup() %>%
