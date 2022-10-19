@@ -15,10 +15,10 @@
         "totalObservations": "11",
         "displayedObservations": "11",
         "variables": "5",
-        "cacheKey": "D567AE66",
+        "cacheKey": "6CD2876A",
         "object": "own_price_elasticity",
         "environment": "",
-        "contentUrl": "grid_resource/gridviewer.html?env=&obj=own_price_elasticity&cache_key=D567AE66&max_cols=50",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=own_price_elasticity&cache_key=6CD2876A&max_cols=50",
         "preview": "0",
         "source_window_id": "",
         "Source": "Source"
