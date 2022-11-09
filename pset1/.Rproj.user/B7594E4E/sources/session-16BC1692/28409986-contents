@@ -1,9 +1,0 @@
-tulio <- read.csv("OTC_data_wide_csv.csv") %>%
-  arrange(week, store)
-arthur <- read.csv("data_clean_wide.csv") %>%
-  arrange(week, store)
-
-
-library(tidyverse)
-
-mkt_sharediff <- tulio$mkt_share1 - arthur$mkt_share_1 %>% as.data.frame()
