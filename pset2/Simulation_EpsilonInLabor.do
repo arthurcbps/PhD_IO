@@ -2,7 +2,7 @@
 clear
 
 set obs 1000
-set seed 2000
+set seed 2022
 
 gen Firm=_n
 
@@ -48,7 +48,7 @@ foreach var in Y K L M {
     gen log_`var'_=log(`var'_)
 }
 
-reg  log_Y_ log_K_ log_L_  log_M_
+reg log_Y_ log_K_ log_L_ log_M_ 
 
 predict log_Y_Hat
 
@@ -64,7 +64,7 @@ bysort Firm: gen log_M_lag=log_M_[_n-1]
 
 *gmm (log_Y_-({b0}+{bk}*log_K_+{bl}*log_L_)-{RhoHat}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
 
-gmm (log_Y_-({b0=1}+exp({bk=-1})*log_K_+(1-exp({bl=-1}))*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+(1-exp({bl}))*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
+gmm (log_Y_-({b0=1}+exp({bk=-1})*log_K_+exp({bl=-1})*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+exp({bl})*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
 
 
 
