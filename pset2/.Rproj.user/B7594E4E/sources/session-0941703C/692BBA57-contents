@@ -1,0 +1,39 @@
+
+HW_data_825hw2 <- read_excel("C:/Users/arthu/Downloads/HW _data_825hw2.xlsx")
+HW_data_825hw2$i = rep(1:1000, each = 10)
+HW_data_825hw2$t = rep(1:10, times = 1000)
+
+
+HW_data_825hw2 <- HW_data_825hw2 %>%
+  group_by(i) %>%
+  arrange(t) %>%
+  mutate(K = exp(Capital),
+         L = exp(Labor),
+         R = exp(Revenue),
+         M = exp(Material)) %>%
+  mutate(
+    K_lag = lag(K, 1),
+    L_lag = lag(L, 1),
+    M_lag = lag(M, 1),
+    R_lag = lag(R, 1)
+  )
+
+first_stage <- lm(log(R) ~ polym(log(K), log(L), log(M), degree = 2),
+                  data = HW_data_825hw2)
+
+
+HW_data_825hw2$phi_hat = fitted(first_stage)
+
+HW_data_825hw2 <- data_long %>%
+  group_by(i) %>%
+  arrange(t) %>%
+  mutate(phi_hat_lag = lag(phi_hat, 1)) %>%
+  na.omit()
+
+# second stage - GMM
+
+
+
+
+acf <- optim(gmm_crit,
+             par = c(0, 0, 0, 0.9))  

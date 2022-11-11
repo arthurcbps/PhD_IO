@@ -1,27 +1,27 @@
 {
-    "id": "28409986",
-    "path": "~/GitHub/PhD_IO/pset2.R",
+    "id": "692BBA57",
+    "path": null,
     "project_path": null,
     "type": "r_source",
-    "hash": "2471703367",
+    "hash": "0",
     "contents": "",
-    "dirty": false,
-    "created": 1665876140580.0,
+    "dirty": true,
+    "created": 1668136639992.0,
     "source_on_save": false,
-    "relative_order": 11,
+    "relative_order": 13,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "34,0",
-        "scrollLine": "0"
+        "cursorPosition": "39,0",
+        "scrollLine": "9"
     },
     "folds": "",
-    "lastKnownWriteTime": 1667342285,
-    "encoding": "UTF-8",
+    "lastKnownWriteTime": 2869581684648,
+    "encoding": "",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1667342285689,
+    "last_content_update": 1668137192012,
     "read_only": false,
     "read_only_alternatives": []
 }

@@ -1,0 +1,26 @@
+{
+    "id": "08444583",
+    "path": "~/GitHub/PhD_IO/pset2/sim_dgp.R",
+    "project_path": "sim_dgp.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1668111735546.0,
+    "source_on_save": true,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "49,8",
+        "scrollLine": "19"
+    },
+    "folds": "64|16|66|0|\n73|16|75|0|\n",
+    "lastKnownWriteTime": 1668111696,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1668137801292,
+    "read_only": false,
+    "read_only_alternatives": []
+}
