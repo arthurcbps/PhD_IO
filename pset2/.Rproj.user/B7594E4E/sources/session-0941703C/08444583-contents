@@ -1,5 +1,6 @@
 
 library(tidyverse)
+
 library(gmm)
 
 
@@ -20,7 +21,7 @@ moment <- function(par, x){
   phi_hat = x[, 8]
   lag_phi_hat = x[, 9]
   
-  xi = r - beta_0 - beta_k*k - beta_l*l - rho*(lag_phi_hat - beta_0 - beta_k*lag_k - beta_l*lag_l)
+  xi = phi_hat - beta_0 - beta_k*k - beta_l*l - rho*(lag_phi_hat - beta_0 - beta_k*lag_k - beta_l*lag_l)
   
   m1 = xi
   m2 = xi*k
@@ -128,7 +129,8 @@ data_long <- data_long %>%
   arrange(t) %>%
   mutate(L_lag = lag(L, 1),
          K_lag = lag(K, 1),
-         M_lag = lag(M, 1)) 
+         M_lag = lag(M, 1),
+         R_lag = lag(R, 1)) 
 
 
 #write_csv(data_long, file = "sim_dgp_data.csv")
@@ -158,20 +160,11 @@ data_long <- data_long %>%
 
 
 acf <- optim(gmm_crit,
-             par = c(0, 0, 0, 0.9))
+             par = c(beta_0 = 0.1, beta_k = 1, beta_l = 1.5, rho = 0.9))
 
 rho_hat[d] <- acf$par[4]
 
 }
-
-rho <- data.frame(rho_hat[1:50])
-
-
-
-
-ggplot(rho, aes( x= rho$rho_hat )) +
-  geom_histogram()
-
 
 
 

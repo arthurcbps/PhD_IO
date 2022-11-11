@@ -1,0 +1,28 @@
+{
+    "id": "852DE01C",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1668138589104.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "id": "664bcd6d57464d819e55ee9e6fa31d96",
+        "name": "acf",
+        "title": "acf",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 2869660129864,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1668138589104,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,5 +1,5 @@
 
-HW_data_825hw2 <- read_excel("C:/Users/arthu/Downloads/HW _data_825hw2.xlsx")
+data_long <- read_excel("./iohw2data.xlsx", col_names = FALSE)
 HW_data_825hw2$i = rep(1:1000, each = 10)
 HW_data_825hw2$t = rep(1:10, times = 1000)
 

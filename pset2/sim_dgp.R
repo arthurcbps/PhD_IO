@@ -1,13 +1,64 @@
 
 library(tidyverse)
+
 library(gmm)
 
 
-set.seed(2)
+moment <- function(par, x){
+  
+  beta_0 = par[1]
+  beta_k = par[2]  
+  beta_l = par[3]
+  rho = par[4]
+  
+  k = log(x[, 1])
+  l = log(x[, 2]) 
+  m = log(x[, 3])
+  r = log(x[, 4])
+  lag_k = log(x[, 5])
+  lag_l = log(x[, 6])
+  lag_m = log(x[, 7])
+  phi_hat = x[, 8]
+  lag_phi_hat = x[, 9]
+  
+  xi = phi_hat - beta_0 - beta_k*k - beta_l*l - rho*(lag_phi_hat - beta_0 - beta_k*lag_k - beta_l*lag_l)
+  
+  m1 = xi
+  m2 = xi*k
+  m3 = xi*l
+  m4 = xi*lag_phi_hat
+  
+  f = cbind(m1, m2, m3, m4)
+  
+  return(f)
+  
+}
+
+gmm_crit <- function(par){
+  x <- moment(par, x = data_long %>%
+                ungroup() %>%
+                select(K, L, M, R, K_lag, L_lag, M_lag, phi_hat, phi_hat_lag) %>%
+                as.matrix())
+  
+  
+  y <- matrix(colMeans(x)) 
+  yt <- t(colMeans(x))
+  
+  return(yt%*%y)
+}
+
 
 T_ <-  10
 I <-  1000
+D = 1
 
+
+rho_hat <- rep(0, D)
+
+
+
+for (d in 1:D) {
+  
 
 # simulate productivity 50 periods past just to get stationarity
 omega_past <-  matrix(0, I, 50)
@@ -65,6 +116,7 @@ dataset <-
          mutate(t = substr(t, 2, nchar(t)) %>%
                   as.numeric()))
 
+rm(l1, l2, K, L, M, R)
 
 data_long <-  cbind(dataset$K, 
                   dataset$L[, 3],
@@ -77,13 +129,42 @@ data_long <- data_long %>%
   arrange(t) %>%
   mutate(L_lag = lag(L, 1),
          K_lag = lag(K, 1),
-         M_lag = lag(M, 1)) %>%
+         M_lag = lag(M, 1),
+         R_lag = lag(R, 1)) 
+
+
+#write_csv(data_long, file = "sim_dgp_data.csv")
+
+
+# ACF 2 step procedure
+
+# 1st step is the filtering stage a nonparametric regression of log revenue on inputs - 
+# we use then a 4th degree polynomial
+
+
+first_stage <- lm(log(R) ~ polym(log(K), log(L), log(M), degree = 2),
+                  data = data_long)
+
+
+data_long$phi_hat = fitted(first_stage)
+
+data_long <- data_long %>%
+  group_by(i) %>%
+  arrange(t) %>%
+  mutate(phi_hat_lag = lag(phi_hat, 1)) %>%
   na.omit()
 
+# second stage - GMM
 
-write_csv()
 
 
+
+acf <- optim(gmm_crit,
+             par = c(beta_0 = 0.1, beta_k = 1, beta_l = 1.5, rho = 0.9))
+
+rho_hat[d] <- acf$par[4]
+
+}
 
 
 
