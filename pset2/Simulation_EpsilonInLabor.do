@@ -66,7 +66,9 @@ bysort Firm: gen log_M_lag=log_M_[_n-1]
 
 gmm (log_Y_-({b0=1}+exp({bk=-1})*log_K_+exp({bl=-1})*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+exp({bl})*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
 
-
+global b0=_b[/b0]
+global bl=exp(_b[/bl])
+global bk=exp(_b[/bk])
 
 
 
