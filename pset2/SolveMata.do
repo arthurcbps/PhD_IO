@@ -13,13 +13,17 @@ mata
 
 	void AckerbergSolve(todo, p, lnf,  S, H){
 		
+		b0=$b0
+		bl=($bl)
+		bk=($bk)
+		
 		al=p[1]
 		ak=p[2]
 		theta=p[3]
 		
-		lnf = (al*theta)/(1-theta*(1-al-ak))-.3965 \   
-		(ak*theta)/(1-theta*(1-al-ak))-.2650 \
-		theta*((1/(1-theta*(1-al-ak))) *(ln(theta*(1-al-ak))+theta^2/10)) +1.136
+		lnf = (al*theta)/(1-theta*(1-al-ak))-bl \   
+		(ak*theta)/(1-theta*(1-al-ak))-bk \
+		theta*((1/(1-theta*(1-al-ak))) *(ln(theta*(1-al-ak))+theta^2/10))-b0
 		
 		lnf=lnf'*lnf
 		
