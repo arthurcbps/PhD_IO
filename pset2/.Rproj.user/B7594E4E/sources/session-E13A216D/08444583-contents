@@ -154,6 +154,8 @@ data_long <- data_long %>%
   mutate(phi_hat_lag = lag(phi_hat, 1)) %>%
   na.omit()
 
+write_csv(data_long, file = "test.csv")
+
 # second stage - GMM
 
 

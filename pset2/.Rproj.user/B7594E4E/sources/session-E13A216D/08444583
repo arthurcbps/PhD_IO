@@ -3,24 +3,24 @@
     "path": "~/GitHub/PhD_IO/pset2/sim_dgp.R",
     "project_path": "sim_dgp.R",
     "type": "r_source",
-    "hash": "3255989370",
+    "hash": "0",
     "contents": "",
-    "dirty": false,
+    "dirty": true,
     "created": 1668111735546.0,
     "source_on_save": true,
     "relative_order": 1,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "170,0",
-        "scrollLine": "93"
+        "cursorPosition": "28,21",
+        "scrollLine": "1"
     },
-    "folds": "65|16|67|0|\n74|16|76|0|\n",
+    "folds": "74|16|76|0|\n",
     "lastKnownWriteTime": 1668143581,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1668143581339,
+    "last_content_update": 1668193485692,
     "read_only": false,
     "read_only_alternatives": []
 }
