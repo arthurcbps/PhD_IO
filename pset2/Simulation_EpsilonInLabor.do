@@ -2,7 +2,7 @@
 clear
 
 set obs 1000
-set seed 2022
+set seed 2000
 
 gen Firm=_n
 
@@ -57,6 +57,7 @@ bysort Firm: gen log_Y_Hat_lag=log_Y_Hat[_n-1]
 bysort Firm: gen log_K_lag=log_K_[_n-1]
 bysort Firm: gen log_L_lag=log_L_[_n-1]
 bysort Firm: gen log_M_lag=log_M_[_n-1]
+bysort Firm: gen log_Y_lag=log_Y_[_n-1]
 
 
 
@@ -64,10 +65,24 @@ bysort Firm: gen log_M_lag=log_M_[_n-1]
 
 *gmm (log_Y_-({b0}+{bk}*log_K_+{bl}*log_L_)-{RhoHat}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
 
-gmm (log_Y_-({b0=1}+exp({bk=-1})*log_K_+exp({bl=-1})*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+exp({bl})*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
+gmm (log_Y_-({b0=-.1}+exp({bk=-1})*log_K_+exp({bl=-1})*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+exp({bl})*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
+
+gmm (log_Y_-({b0=-.1}+{bk}*log_K_+{bl=-1}*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
 
 
+global b0=_b[/b0]
+global bl=exp(_b[/bl])
+global bk=exp(_b[/bk])
+
+di $b0 
+di $bk
+di $bl
+
+di .8*((1/.6)*ln(.4)+(1/.6)*(.8^2/10))
 
 
+*Blundell-Bond
+
+gmm (log_Y_-{RhoHat=.8}*log_Y_lag-{b0}*(1-{RhoHat})-{bk}*(log_K_-{RhoHat}*log_K_lag)-{bl}*(log_L_-{RhoHat}*log_L_lag)), instruments(log_K_ log_K_lag log_L_ log_L_lag ) 
 
 
