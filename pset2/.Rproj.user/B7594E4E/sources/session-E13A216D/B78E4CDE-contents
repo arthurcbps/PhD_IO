@@ -1,3 +1,0 @@
-
-
-bb <- lm(log(R) ~ log(R_lag) + log(K) + log(L) + log(K_lag) + log(L_lag), data = data_long)

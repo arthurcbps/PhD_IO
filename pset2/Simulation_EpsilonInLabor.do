@@ -1,13 +1,15 @@
 
+*Initialize simulation
 clear
-
 set obs 1000
 set seed 2000
 
+*Create data
 gen Firm=_n
 
 global Rho=0.9
 
+*Simulate 100 periods and keep the last 10 to make sure that the series is close to a stationary state
 gen Omega_0=rnormal(0,1)
 forvalues t=1/100{
 	local tt=`t'-1
@@ -25,6 +27,7 @@ forvalues t=0/100{
 	}
 }
 
+*Use analytical relations to construct inputs and revenue (in the process we also create some unobserved variables but we will not use those for estimation)
 gen Epsilon_0=rnormal(0,3)
 forvalues t=0/9{
     
@@ -40,6 +43,7 @@ forvalues t=0/9{
 	
 }
 
+*Reshape data and get log-variables
 reshape long Y_ L_ K_ M_ Omega_ U_ Epsilon_, i(Firm) j(t)
 
 drop if t==0
@@ -48,10 +52,11 @@ foreach var in Y K L M {
     gen log_`var'_=log(`var'_)
 }
 
+*First stage predictions
 reg log_Y_ log_K_ log_L_ log_M_ 
-
 predict log_Y_Hat
 
+*Get lags
 sort Firm t
 bysort Firm: gen log_Y_Hat_lag=log_Y_Hat[_n-1]
 bysort Firm: gen log_K_lag=log_K_[_n-1]
@@ -59,30 +64,45 @@ bysort Firm: gen log_L_lag=log_L_[_n-1]
 bysort Firm: gen log_M_lag=log_M_[_n-1]
 bysort Firm: gen log_Y_lag=log_Y_[_n-1]
 
-
-
-*gmm (log_Y_-({eta=.5})*({bk=.5}*log_K_+{bl=.5}*log_L_+(1-{bl}-{bk})*log_M_)-{RhoHat=.5}*(log_Y_Hat_lag-({eta})*({bk}*log_K_lag+{bl}*log_L_lag+(1-{bl}-{bk})*log_M_lag))), instruments(log_K_lag log_L_lag log_Y_Hat_lag) 
-
-*gmm (log_Y_-({b0}+{bk}*log_K_+{bl}*log_L_)-{RhoHat}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
-
-gmm (log_Y_-({b0=-.1}+exp({bk=-1})*log_K_+exp({bl=-1})*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+exp({bk})*log_K_lag+exp({bl})*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
-
-gmm (log_Y_-({b0=-.1}+{bk}*log_K_+{bl=-1}*log_L_)-{RhoHat=1}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag) 
-
+*************************************************************
+*GMM- Ackerberg et Al
+*************************************************************
+gmm (log_Y_-({b0=-.1}+{bk}*log_K_+{bl}*log_L_)-{RhoHat=.9}*(log_Y_Hat_lag-({b0}+{bk}*log_K_lag+{bl}*log_L_lag))), instruments(log_K_ log_L_lag log_Y_Hat_lag ) 
 
 global b0=_b[/b0]
-global bl=exp(_b[/bl])
-global bk=exp(_b[/bk])
+global bl=_b[/bl]
+global bk=_b[/bk]
+global RhoHat=_b[/RhoHat]
 
-di $b0 
-di $bk
-di $bl
+do D:\DDC\PhD_IO\pset2\SolveMata
 
-di .8*((1/.6)*ln(.4)+(1/.6)*(.8^2/10))
+putexcel set D:\DDC\PhD_IO\pset2\Results, modify
+
+putexcel c4=$bl
+putexcel d4=$bk
+putexcel e4=$b0
+putexcel f4=$RhoHat
+
+putexcel c9=matrix(r)
+putexcel f9=$RhoHat
+
+*************************************************************
+*GMM- Blundell-Bond
+*************************************************************
+gmm (log_Y_-{RhoHat=.8}*log_Y_Hat_lag-{b0}*(1-{RhoHat})-{bk}*(log_K_-{RhoHat}*log_K_lag)-{bl}*(log_L_-{RhoHat}*log_L_lag)), instruments(log_K_ log_K_lag log_L_ log_L_lag ) 
+
+global b0=_b[/b0]
+global bl=_b[/bl]
+global bk=_b[/bk]
+global RhoHat=_b[/RhoHat]
+
+do D:\DDC\PhD_IO\pset2\SolveMata
+
+putexcel i4=$bl
+putexcel j4=$bk
+putexcel k4=$b0
+putexcel l4=$RhoHat
 
 
-*Blundell-Bond
-
-gmm (log_Y_-{RhoHat=.8}*log_Y_lag-{b0}*(1-{RhoHat})-{bk}*(log_K_-{RhoHat}*log_K_lag)-{bl}*(log_L_-{RhoHat}*log_L_lag)), instruments(log_K_ log_K_lag log_L_ log_L_lag ) 
-
-
+putexcel i9=matrix(r)
+putexcel l9=$RhoHat
