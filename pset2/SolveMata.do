@@ -1,15 +1,9 @@
 
-global b0=_b[/b0]
-global bl=_b[/bl]
-global bk=_b[/bk]
+
 
 clear mata
 
 mata
-
-	b0=$b0
-	bl=exp($bl)
-	bk=exp($bk)
 
 	void AckerbergSolve(todo, p, lnf,  S, H){
 		
@@ -47,6 +41,9 @@ mata
 
 	p = optimize(S)
 
-	p 
+	p
+	
+	st_matrix("x",p)
+
 end
 
